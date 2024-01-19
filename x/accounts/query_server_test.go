@@ -62,4 +62,10 @@ func TestQueryServer(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "test", typ.AccountType)
 	})
+
+	t.Run("account by type", func(t *testing.T) {
+		typ, err := qs.AccountsByTypes(ctx, &v1.AccountsByTypesRequest{AccountTypes: []string{"test"}})
+		require.NoError(t, err)
+		require.Equal(t, initResp.AccountAddress, typ.Accounts[0])
+	})
 }

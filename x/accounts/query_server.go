@@ -113,13 +113,13 @@ func (q queryServer) SimulateUserOperation(ctx context.Context, request *v1.Simu
 // Get all account address that belong to a account type
 func (q queryServer) AccountsByTypes(ctx context.Context, request *v1.AccountsByTypesRequest) (*v1.AccountsByTypesResponse, error) {
 	accounts := []string{}
-	err := q.k.AccountsByType.Walk(ctx, nil, func(address []byte, accType string) (bool, error) {
-		if slices.Contains(request.AccountTypes, accType) {
-			addressStr, err := q.k.addressCodec.BytesToString(address)
+	err := q.k.AccountsByType.Walk(ctx, nil, func(key []byte, value string) (bool, error) {
+		if slices.Contains(request.AccountTypes, value) {
+			addr, err := q.k.addressCodec.BytesToString(key)
 			if err != nil {
 				return true, err
 			}
-			accounts = append(accounts, addressStr)
+			accounts = append(accounts, addr)
 		}
 		return false, nil
 	})
