@@ -24,6 +24,7 @@ const (
 	Query_AccountType_FullMethodName           = "/cosmos.accounts.v1.Query/AccountType"
 	Query_AccountNumber_FullMethodName         = "/cosmos.accounts.v1.Query/AccountNumber"
 	Query_SimulateUserOperation_FullMethodName = "/cosmos.accounts.v1.Query/SimulateUserOperation"
+	Query_AccountsByTypes_FullMethodName       = "/cosmos.accounts.v1.Query/AccountsByTypes"
 )
 
 // QueryClient is the client API for Query service.
@@ -40,6 +41,8 @@ type QueryClient interface {
 	AccountNumber(ctx context.Context, in *AccountNumberRequest, opts ...grpc.CallOption) (*AccountNumberResponse, error)
 	// SimulateUserOperation simulates a user operation.
 	SimulateUserOperation(ctx context.Context, in *SimulateUserOperationRequest, opts ...grpc.CallOption) (*SimulateUserOperationResponse, error)
+	// AccountByType returns all accounts belong to a set of account types operation.
+	AccountsByTypes(ctx context.Context, in *AccountsByTypesRequest, opts ...grpc.CallOption) (*AccountsByTypesResponse, error)
 }
 
 type queryClient struct {
@@ -95,6 +98,15 @@ func (c *queryClient) SimulateUserOperation(ctx context.Context, in *SimulateUse
 	return out, nil
 }
 
+func (c *queryClient) AccountsByTypes(ctx context.Context, in *AccountsByTypesRequest, opts ...grpc.CallOption) (*AccountsByTypesResponse, error) {
+	out := new(AccountsByTypesResponse)
+	err := c.cc.Invoke(ctx, Query_AccountsByTypes_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
@@ -109,6 +121,8 @@ type QueryServer interface {
 	AccountNumber(context.Context, *AccountNumberRequest) (*AccountNumberResponse, error)
 	// SimulateUserOperation simulates a user operation.
 	SimulateUserOperation(context.Context, *SimulateUserOperationRequest) (*SimulateUserOperationResponse, error)
+	// AccountByType returns all accounts belong to a set of account types operation.
+	AccountsByTypes(context.Context, *AccountsByTypesRequest) (*AccountsByTypesResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -130,6 +144,9 @@ func (UnimplementedQueryServer) AccountNumber(context.Context, *AccountNumberReq
 }
 func (UnimplementedQueryServer) SimulateUserOperation(context.Context, *SimulateUserOperationRequest) (*SimulateUserOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SimulateUserOperation not implemented")
+}
+func (UnimplementedQueryServer) AccountsByTypes(context.Context, *AccountsByTypesRequest) (*AccountsByTypesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccountsByTypes not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -234,6 +251,24 @@ func _Query_SimulateUserOperation_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_AccountsByTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AccountsByTypesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AccountsByTypes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_AccountsByTypes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AccountsByTypes(ctx, req.(*AccountsByTypesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -260,6 +295,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SimulateUserOperation",
 			Handler:    _Query_SimulateUserOperation_Handler,
+		},
+		{
+			MethodName: "AccountsByTypes",
+			Handler:    _Query_AccountsByTypes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

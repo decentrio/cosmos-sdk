@@ -113,3 +113,15 @@ message QueryOwnerResponse {
   // owner defines the value of the owner of the vesting account.
   string owner = 1;
 }
+
+// QueryOwnerVestingAccountRequest is used to query all vesting accounts belong to an owner.
+message QueryOwnerVestingAccountRequest {
+  // owner defines the value of the owner.
+  string owner = 1;
+}
+
+// QueryOwnerVestingAccountResponse returns all vesting accounts belong to an owner.
+message QueryOwnerVestingAccountResponse {
+  // vesting_accounts defines the list of the owner's vesting account.
+  repeated string vesting_accounts = 1;
+}

@@ -19,6 +19,8 @@ service Query {
   rpc AccountNumber(AccountNumberRequest) returns (AccountNumberResponse) {};
   // SimulateUserOperation simulates a user operation.
   rpc SimulateUserOperation(SimulateUserOperationRequest) returns (SimulateUserOperationResponse) {};
+  // AccountByType returns all accounts belong to a set of account types operation.
+  rpc AccountsByTypes(AccountsByTypesRequest) returns (AccountsByTypesResponse) {};
 }
 
 // AccountQueryRequest is the request type for the Query/AccountQuery RPC
@@ -100,4 +102,16 @@ message SimulateUserOperationRequest {
 message SimulateUserOperationResponse {
   // UserOperationResponse is the response of the simulation.
   UserOperationResponse user_operation_response = 1;
+}
+
+// AccountByTypeRequest is the query request used to get all account belong to a set
+// of account types.
+message AccountsByTypesRequest {
+  repeated string account_types = 1;
+}
+
+// AccountByTypeResponse is the query response returned all account belong to a set
+// of account types.
+message AccountsByTypesResponse {
+  repeated string accounts = 1;
 }

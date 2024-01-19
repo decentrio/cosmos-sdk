@@ -3,6 +3,7 @@ package accounts
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"cosmossdk.io/x/accounts/internal/implementation"
 	v1 "cosmossdk.io/x/accounts/v1"
@@ -107,4 +108,27 @@ func (q queryServer) SimulateUserOperation(ctx context.Context, request *v1.Simu
 
 	resp := q.k.ExecuteUserOperation(ctx, request.Bundler, request.UserOperation)
 	return &v1.SimulateUserOperationResponse{UserOperationResponse: resp}, nil
+}
+
+// Get all account address that belong to a account type
+func (q queryServer) AccountsByTypes(ctx context.Context, request *v1.AccountsByTypesRequest) (*v1.AccountsByTypesResponse, error) {
+	accounts := []string{}
+	err := q.k.AccountsByType.Walk(ctx, nil, func(address []byte, accType string) (bool, error) {
+		if slices.Contains(request.AccountTypes, accType) {
+			addressStr, err := q.k.addressCodec.BytesToString(address)
+			if err != nil {
+				return true, err
+			}
+			accounts = append(accounts, addressStr)
+		}
+		return false, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.AccountsByTypesResponse{
+		Accounts: accounts,
+	}, nil
 }

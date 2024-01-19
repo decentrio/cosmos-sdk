@@ -12,6 +12,7 @@ import (
 	"cosmossdk.io/math"
 	"cosmossdk.io/x/accounts/accountstd"
 	account_abstractionv1 "cosmossdk.io/x/accounts/interfaces/account_abstraction/v1"
+	accountsv1 "cosmossdk.io/x/accounts/v1"
 	banktypes "cosmossdk.io/x/bank/types"
 	stakingtypes "cosmossdk.io/x/staking/types"
 	vestingtypes "cosmossdk.io/x/vesting/types/v1"
@@ -479,6 +480,49 @@ func (bva BaseVesting) QueryOwner(ctx context.Context, _ *vestingtypes.QueryOwne
 	}, nil
 }
 
+// QueryOwnerVestingAccounts return all vesting accounts for a owner
+func QueryOwnerVestingAccounts(ctx context.Context, request *vestingtypes.QueryOwnerVestingAccountRequest) (*vestingtypes.QueryOwnerVestingAccountResponse, error) {
+	resp, err := accountstd.QueryModule[accountsv1.AccountsByTypesResponse](ctx, &accountsv1.AccountsByTypesRequest{
+		AccountTypes: []string{
+			CONTINUOS_VESTING_ACCOUNT, PERIODIC_VESTING_ACCOUNT, PERMERNANT_VESTING_ACCOUNT, DELAYED_VESTING_ACCOUNT,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := resp.Accounts
+	addresses := make([]string, len(accounts))
+	for _, acc := range accounts {
+		reqRaw, err := accountstd.PackAny(&vestingtypes.QueryOwnerRequest{})
+		if err != nil {
+			return nil, err
+		}
+		// run query
+		respRaw, err := accountstd.QueryModule[accountsv1.AccountQueryResponse](ctx, &accountsv1.AccountQueryRequest{
+			Target:  acc,
+			Request: reqRaw,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := accountstd.UnpackAny[vestingtypes.QueryOwnerResponse](respRaw.Response)
+		if err != nil {
+			return nil, err
+		}
+
+		if request.Owner == resp.Owner {
+			if err != nil {
+				return nil, err
+			}
+			addresses = append(addresses, acc)
+		}
+	}
+
+	return &vestingtypes.QueryOwnerVestingAccountResponse{VestingAccounts: addresses}, nil
+}
+
 func (bva BaseVesting) RegisterExecuteHandlers(builder *accountstd.ExecuteBuilder) {
 	accountstd.RegisterExecuteHandler(builder, bva.Authenticate)
 }
@@ -489,4 +533,5 @@ func (bva BaseVesting) RegisterQueryHandlers(builder *accountstd.QueryBuilder) {
 	accountstd.RegisterQueryHandler(builder, bva.QueryDelegatedVesting)
 	accountstd.RegisterQueryHandler(builder, bva.QueryEndTime)
 	accountstd.RegisterQueryHandler(builder, bva.QueryOwner)
+	accountstd.RegisterQueryHandler(builder, QueryOwnerVestingAccounts)
 }
