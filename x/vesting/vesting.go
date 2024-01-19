@@ -38,6 +38,15 @@ var (
 	PERMERNANT_VESTING_ACCOUNT = "permernant-vesting-account"
 )
 
+var (
+	vestingTypeMap = map[string]struct{}{
+		"continuos-vesting-acount":   {},
+		"delayed-vesting-account":    {},
+		"periodic-vesting-account":   {},
+		"permernant-vesting-account": {},
+	}
+)
+
 type getVestingFunc = func(ctx context.Context, time time.Time) (sdk.Coins, error)
 
 // NewBaseVesting creates a new BaseVesting object.
@@ -484,19 +493,18 @@ func (bva BaseVesting) QueryOwner(ctx context.Context, _ *vestingtypes.QueryOwne
 func QueryOwnerVestingAccounts(ctx context.Context, request *vestingtypes.QueryOwnerVestingAccountRequest) (
 	*vestingtypes.QueryOwnerVestingAccountResponse, error,
 ) {
+	err := validateOwnerVestingAccountRequest(request)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := accountstd.QueryModule[accountsv1.AccountsByTypesResponse](ctx, &accountsv1.AccountsByTypesRequest{
-		AccountTypes: []string{
-			CONTINUOS_VESTING_ACCOUNT,
-			PERIODIC_VESTING_ACCOUNT,
-			PERMERNANT_VESTING_ACCOUNT,
-			DELAYED_VESTING_ACCOUNT,
-		},
+		AccountType: request.VestingType,
 	})
 	if err != nil {
 		return nil, err
 	}
-
 	accounts := resp.Accounts
+
 	addresses := make([]string, len(accounts))
 	for _, acc := range accounts {
 		reqRaw, err := accountstd.PackAny(&vestingtypes.QueryOwnerRequest{})

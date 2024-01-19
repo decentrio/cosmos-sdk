@@ -3,7 +3,6 @@ package accounts
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"cosmossdk.io/x/accounts/internal/implementation"
 	v1 "cosmossdk.io/x/accounts/v1"
@@ -114,7 +113,7 @@ func (q queryServer) SimulateUserOperation(ctx context.Context, request *v1.Simu
 func (q queryServer) AccountsByTypes(ctx context.Context, request *v1.AccountsByTypesRequest) (*v1.AccountsByTypesResponse, error) {
 	accounts := []string{}
 	err := q.k.AccountsByType.Walk(ctx, nil, func(key []byte, value string) (bool, error) {
-		if slices.Contains(request.AccountTypes, value) {
+		if value == request.AccountType {
 			addr, err := q.k.addressCodec.BytesToString(key)
 			if err != nil {
 				return true, err

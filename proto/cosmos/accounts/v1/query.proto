@@ -104,14 +104,14 @@ message SimulateUserOperationResponse {
   UserOperationResponse user_operation_response = 1;
 }
 
-// AccountByTypeRequest is the query request used to get all account belong to a set
-// of account types.
+// AccountByTypeRequest is the query request used to get all account belong
+// an account type.
 message AccountsByTypesRequest {
-  repeated string account_types = 1;
+  string account_type = 1;
 }
 
-// AccountByTypeResponse is the query response returned all account belong to a set
-// of account types.
+// AccountByTypeResponse is the query response returned all account belong to
+// an account type.
 message AccountsByTypesResponse {
   repeated string accounts = 1;
 }
