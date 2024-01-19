@@ -481,10 +481,15 @@ func (bva BaseVesting) QueryOwner(ctx context.Context, _ *vestingtypes.QueryOwne
 }
 
 // QueryOwnerVestingAccounts return all vesting accounts for a owner
-func QueryOwnerVestingAccounts(ctx context.Context, request *vestingtypes.QueryOwnerVestingAccountRequest) (*vestingtypes.QueryOwnerVestingAccountResponse, error) {
+func QueryOwnerVestingAccounts(ctx context.Context, request *vestingtypes.QueryOwnerVestingAccountRequest) (
+	*vestingtypes.QueryOwnerVestingAccountResponse, error,
+) {
 	resp, err := accountstd.QueryModule[accountsv1.AccountsByTypesResponse](ctx, &accountsv1.AccountsByTypesRequest{
 		AccountTypes: []string{
-			CONTINUOS_VESTING_ACCOUNT, PERIODIC_VESTING_ACCOUNT, PERMERNANT_VESTING_ACCOUNT, DELAYED_VESTING_ACCOUNT,
+			CONTINUOS_VESTING_ACCOUNT,
+			PERIODIC_VESTING_ACCOUNT,
+			PERMERNANT_VESTING_ACCOUNT,
+			DELAYED_VESTING_ACCOUNT,
 		},
 	})
 	if err != nil {

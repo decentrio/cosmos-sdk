@@ -110,7 +110,7 @@ func (q queryServer) SimulateUserOperation(ctx context.Context, request *v1.Simu
 	return &v1.SimulateUserOperationResponse{UserOperationResponse: resp}, nil
 }
 
-// Get all account address that belong to a account type
+// Get all account addresses that belong to a set of account types
 func (q queryServer) AccountsByTypes(ctx context.Context, request *v1.AccountsByTypesRequest) (*v1.AccountsByTypesResponse, error) {
 	accounts := []string{}
 	err := q.k.AccountsByType.Walk(ctx, nil, func(key []byte, value string) (bool, error) {
