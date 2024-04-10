@@ -337,6 +337,7 @@ func (s *Store) saveSnapshot(snapshot *types.Snapshot) error {
 		return errors.Wrap(err, "failed to encode snapshot metadata")
 	}
 	err = os.WriteFile(s.pathMetadata(snapshot.Height, snapshot.Format), value, 0o600)
+	fmt.Println("WriteFile", s.pathMetadata(snapshot.Height, snapshot.Format), value)
 	if err != nil {
 		return errors.Wrap(err, "failed to write snapshot metadata")
 	}

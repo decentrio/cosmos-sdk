@@ -3,6 +3,7 @@ package snapshots_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 	"testing"
@@ -324,6 +325,7 @@ func TestStore_Save(t *testing.T) {
 	go func() {
 		mtx.Unlock()
 		_, err := store.Save(7, 1, ch)
+		fmt.Println("Store Save err", err)
 		require.NoError(t, err)
 	}()
 	mtx.Lock()
