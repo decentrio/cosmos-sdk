@@ -12,7 +12,6 @@ import (
 	"cosmossdk.io/core/transaction"
 	"cosmossdk.io/server/v2/cometbft"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"cosmossdk.io/client/v2/offchain"
 	"cosmossdk.io/log"
