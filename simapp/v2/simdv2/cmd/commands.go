@@ -80,8 +80,8 @@ func initRootCmd(
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
 		// server.StatusCommand(),
-		genesisCommand(txConfig, v1moduleManager, appExport),
-		queryCommand(),
+		// genesisCommand(txConfig, v1moduleManager, appExport),
+		// queryCommand(),
 		txCommand(),
 		keys.Commands(),
 		offchain.OffChain(),
