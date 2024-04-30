@@ -237,5 +237,7 @@ var tempDir = func() string {
 	}
 	defer os.RemoveAll(dir)
 
+	fmt.Println("check")
+
 	return dir
 }
