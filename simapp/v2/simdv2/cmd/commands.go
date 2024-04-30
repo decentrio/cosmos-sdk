@@ -79,7 +79,7 @@ func initRootCmd(
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
-		server.StatusCommand(),
+		// server.StatusCommand(),
 		genesisCommand(txConfig, v1moduleManager, appExport),
 		queryCommand(),
 		txCommand(),
@@ -236,8 +236,5 @@ var tempDir = func() string {
 		dir = simapp.DefaultNodeHome
 	}
 	defer os.RemoveAll(dir)
-
-	fmt.Println("check")
-
 	return dir
 }
