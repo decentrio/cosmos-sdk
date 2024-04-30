@@ -4,14 +4,10 @@ on:
   merge_group:
   push:
     branches:
-      - main
+      - server_
       - release/**
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}-build
-  cancel-in-progress: true
 
 jobs:
   build:
