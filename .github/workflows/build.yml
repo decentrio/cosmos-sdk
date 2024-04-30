@@ -34,6 +34,8 @@ jobs:
         run: GOARCH=${{ matrix.go-arch }} make build
       - name: Build (v1 legacy & v2 legacy)
         run: GOARCH=${{ matrix.go-arch }} COSMOS_BUILD_OPTIONS=legacy make build
+      - name: V2 Start
+        run: GOARCH=${{ matrix.go-arch }} bash ./simv2.sh
       - name: Build with rocksdb backend
         if: |
           env.GIT_DIFF &&
