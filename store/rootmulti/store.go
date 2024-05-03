@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"encoding/json"
+	"os"
 
 	iavltree "github.com/cosmos/iavl"
 	protoio "github.com/gogo/protobuf/io"
@@ -223,6 +225,12 @@ func (rs *Store) loadVersion(ver int64, upgrades *types.StoreUpgrades) error {
 	}
 
 	for _, key := range storesKeys {
+		if key.Name() == "evm" {
+			storeParams := rs.storesParams[key]
+			commitID := rs.getCommitID(infos, key.Name())
+			store, _ := rs.loadCommitStoreFromParams(key, commitID, storeParams)
+			checkKVStore(store)
+		}
 		storeParams := rs.storesParams[key]
 		commitID := rs.getCommitID(infos, key.Name())
 
@@ -318,6 +326,38 @@ func moveKVStoreData(oldDB types.KVStore, newDB types.KVStore) error {
 
 	// then delete the old store
 	return deleteKVStore(oldDB)
+}
+
+func checkKVStore(oldDB types.KVStore) {
+	// we read from one and write to another
+	itr := oldDB.Iterator(nil, nil)
+	storeMap := make(map[string]string)
+	for itr.Valid() {
+		storeMap[string(itr.Key())] = string(itr.Value())
+		itr.Next()
+	}
+	itr.Close()
+	jsonData, err := json.MarshalIndent(storeMap, "", "    ")
+	if err != nil {
+		fmt.Println("Error marshalling JSON:", err)
+		return
+	}
+
+	// Write JSON data to a file
+	file, err := os.Create("evmdata.json")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return
+	}
+	defer file.Close()
+
+	_, err = file.Write(jsonData)
+	if err != nil {
+		fmt.Println("Error writing to file:", err)
+		return
+	}
+
+	fmt.Println("JSON data has been written to data.json file.")
 }
 
 // PruneSnapshotHeight prunes the given height according to the prune strategy.
