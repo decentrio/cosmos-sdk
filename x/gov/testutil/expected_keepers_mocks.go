@@ -519,17 +519,17 @@ func (mr *MockBankKeeperMockRecorder) InitGenesis(arg0, arg1 interface{}) *gomoc
 }
 
 // InputOutputCoins mocks base method.
-func (m *MockBankKeeper) InputOutputCoins(ctx types.Context, inputs []types1.Input, outputs []types1.Output) error {
+func (m *MockBankKeeper) InputOutputCoins(ctx types.Context, input types1.Input, outputs []types1.Output) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InputOutputCoins", ctx, inputs, outputs)
+	ret := m.ctrl.Call(m, "InputOutputCoins", ctx, input, outputs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InputOutputCoins indicates an expected call of InputOutputCoins.
-func (mr *MockBankKeeperMockRecorder) InputOutputCoins(ctx, inputs, outputs interface{}) *gomock.Call {
+func (mr *MockBankKeeperMockRecorder) InputOutputCoins(ctx, input, outputs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputOutputCoins", reflect.TypeOf((*MockBankKeeper)(nil).InputOutputCoins), ctx, inputs, outputs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputOutputCoins", reflect.TypeOf((*MockBankKeeper)(nil).InputOutputCoins), ctx, input, outputs)
 }
 
 // IsSendEnabledCoin mocks base method.
@@ -941,10 +941,45 @@ func (m *MockBankKeeper) WithMintCoinsRestriction(arg0 keeper.MintingRestriction
 	return ret0
 }
 
+func (m *MockBankKeeper) AppendSendRestriction(restriction types1.SendRestrictionFn) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AppendSendRestriction", restriction)
+}
+
+// AppendSendRestriction indicates an expected call of AppendSendRestriction.
+func (mr *MockBankKeeperMockRecorder) AppendSendRestriction(restriction interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppendSendRestriction", reflect.TypeOf((*MockBankKeeper)(nil).AppendSendRestriction), restriction)
+}
+
 // WithMintCoinsRestriction indicates an expected call of WithMintCoinsRestriction.
 func (mr *MockBankKeeperMockRecorder) WithMintCoinsRestriction(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithMintCoinsRestriction", reflect.TypeOf((*MockBankKeeper)(nil).WithMintCoinsRestriction), arg0)
+}
+
+// ClearSendRestriction mocks base method.
+func (m *MockBankKeeper) ClearSendRestriction() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ClearSendRestriction")
+}
+
+// ClearSendRestriction indicates an expected call of ClearSendRestriction.
+func (mr *MockBankKeeperMockRecorder) ClearSendRestriction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearSendRestriction", reflect.TypeOf((*MockBankKeeper)(nil).ClearSendRestriction))
+}
+
+// PrependSendRestriction mocks base method.
+func (m *MockBankKeeper) PrependSendRestriction(restriction types1.SendRestrictionFn) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PrependSendRestriction", restriction)
+}
+
+// PrependSendRestriction indicates an expected call of PrependSendRestriction.
+func (mr *MockBankKeeperMockRecorder) PrependSendRestriction(restriction interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrependSendRestriction", reflect.TypeOf((*MockBankKeeper)(nil).PrependSendRestriction), restriction)
 }
 
 // MockStakingKeeper is a mock of StakingKeeper interface.
