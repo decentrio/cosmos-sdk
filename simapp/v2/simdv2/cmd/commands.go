@@ -17,6 +17,7 @@ import (
 	"cosmossdk.io/core/transaction"
 	"cosmossdk.io/log"
 	runtimev2 "cosmossdk.io/runtime/v2"
+	serverv2 "cosmossdk.io/server/v2"
 	"cosmossdk.io/server/v2/cometbft"
 	"cosmossdk.io/simapp/v2"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
@@ -29,10 +30,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-
 	// TODO migrate all server dependencies to server/v2
 	"github.com/cosmos/cosmos-sdk/server"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types" // there only ExportedApp consider here
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
@@ -54,6 +54,27 @@ func (t *temporaryTxDecoder) DecodeJSON(bz []byte) (transaction.Tx, error) {
 	return t.txConfig.TxJSONDecoder()(bz)
 }
 
+// newApp creates the application
+// Q: should we only init cometserver when start or earlier is ok?
+func newCometBFTServer(
+	viper *viper.Viper,
+	logger log.Logger,
+	txCodec transaction.Codec[transaction.Tx],
+) serverv2.ServerModule {
+	sa := simapp.NewSimApp(logger, viper)
+	am := sa.App.AppManager
+	serverCfg := cometbft.Config{CmtConfig: client.GetConfigFromViper(viper), ConsensusAuthority: sa.GetConsensusAuthority()}
+
+	cometServer := cometbft.NewCometBFTServer[transaction.Tx](
+		am,
+		sa.GetStore(),
+		sa.GetLogger(),
+		serverCfg,
+		txCodec,
+	)
+	return cometServer
+}
+
 func initRootCmd(
 	rootCmd *cobra.Command,
 	txConfig client.TxConfig,
@@ -69,12 +90,15 @@ func initRootCmd(
 		genutilcli.InitCmd(moduleManager),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
-		startCommand(&temporaryTxDecoder{txConfig}),
+		// startCommand(&temporaryTxDecoder{txConfig}),
 		// pruning.Cmd(newApp),
 		// snapshot.Cmd(newApp),
 	)
 
-	// server.AddCommands(rootCmd, log.NewNopLogger(), tempDir()) // TODO: How to cast from AppModule to ServerModule
+	err := serverv2.AddCommands(rootCmd, &temporaryTxDecoder{txConfig}, log.NewNopLogger(), tempDir(), newCometBFTServer) // TODO: How to cast from AppModule to ServerModule
+	if err != nil {
+		panic(fmt.Sprintf("Add cmd, %v", err))
+	}
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(
@@ -236,5 +260,6 @@ var tempDir = func() string {
 	}
 	defer os.RemoveAll(dir)
 
-	return dir
+	// Hardcode here so it not breake AddCommand
+	return simapp.DefaultNodeHome
 }
