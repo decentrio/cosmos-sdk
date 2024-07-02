@@ -121,6 +121,7 @@ func (s *SystemUnderTest) SetupChain() {
 	s.nodesCount = s.initialNodesCount
 
 	// modify genesis with system test defaults
+	fmt.Println("Node path", s.nodePath(0))
 	src := filepath.Join(WorkDir, s.nodePath(0), "config", "genesis.json")
 	genesisBz, err := os.ReadFile(src) // #nosec G304
 	if err != nil {
@@ -154,7 +155,7 @@ func (s *SystemUnderTest) StartChain(t *testing.T, xargs ...string) {
 	t.Helper()
 	s.Log("Start chain\n")
 	s.ChainStarted = true
-	s.startNodesAsync(t, append([]string{"start", "--trace", "--log_level=info"}, xargs...)...)
+	s.startNodesAsync(t, append([]string{"start", "--log_level=info"}, xargs...)...)
 
 	s.AwaitNodeUp(t, s.rpcAddr)
 
@@ -433,7 +434,7 @@ func (s *SystemUnderTest) ResetChain(t *testing.T) {
 	s.nodesCount = s.initialNodesCount
 
 	// reset all validator nodes
-	s.ForEachNodeExecAndWait(t, []string{"comet", "unsafe-reset-all"})
+	s.ForEachNodeExecAndWait(t, []string{"cometbft-server", "unsafe-reset-all"})
 	s.currentHeight = 0
 	s.dirty = false
 }

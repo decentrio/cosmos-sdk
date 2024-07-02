@@ -20,5 +20,7 @@ func (k *Keeper) BeginBlocker(ctx context.Context) error {
 func (k *Keeper) EndBlocker(ctx context.Context) ([]appmodule.ValidatorUpdate, error) {
 	start := telemetry.Now()
 	defer telemetry.ModuleMeasureSince(types.ModuleName, start, telemetry.MetricKeyEndBlocker)
-	return k.BlockValidatorUpdates(ctx)
+	validatorUpdate, err := k.BlockValidatorUpdates(ctx)
+	k.Logger.Info("staking endblocker", "height", k.HeaderService.HeaderInfo(ctx).Height, "validatorUpdate", validatorUpdate)
+	return validatorUpdate, err
 }

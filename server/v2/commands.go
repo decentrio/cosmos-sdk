@@ -52,7 +52,15 @@ func Commands[AppT AppI[T], T transaction.Tx](
 		Use:   "start",
 		Short: "Run the application",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			v := GetViperFromCmd(cmd)
+			home, err := cmd.Flags().GetString(FlagHome)
+			if err != nil {
+				return err
+			}
+			v, err := ReadConfig(filepath.Join(home, "config"))
+			if err != nil {
+				return err
+			}
+			
 			l := GetLoggerFromCmd(cmd)
 
 			for _, startFlags := range flags {
@@ -160,6 +168,7 @@ func AddCommands[AppT AppI[T], T transaction.Tx](
 // configHandle writes the default config to the home directory if it does not exist and sets the server context
 func configHandle[AppT AppI[T], T transaction.Tx](s *Server[AppT, T], cmd *cobra.Command) error {
 	home, err := cmd.Flags().GetString(FlagHome)
+	cmd.Println("configHandle home", home)
 	if err != nil {
 		return err
 	}

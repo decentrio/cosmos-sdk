@@ -285,6 +285,7 @@ func (m *MM[T]) EndBlock() (
 	var validatorUpdates []appmodulev2.ValidatorUpdate
 	endBlockFunc = func(ctx context.Context) error {
 		for _, moduleName := range m.config.EndBlockers {
+			m.logger.Info("loop modules", "name", moduleName)
 			if module, ok := m.modules[moduleName].(appmodulev2.HasEndBlocker); ok {
 				err := module.EndBlock(ctx)
 				if err != nil {
@@ -298,6 +299,7 @@ func (m *MM[T]) EndBlock() (
 				// use these validator updates if provided, the module manager assumes
 				// only one module will update the validator set
 				if len(moduleValUpdates) > 0 {
+					m.logger.Info("validator update 1", "moduleValUpdates", moduleValUpdates, "validatorUpdates", validatorUpdates, "module", moduleName)
 					if len(validatorUpdates) > 0 {
 						return errors.New("validator end block updates already set by a previous module")
 					}
@@ -321,6 +323,7 @@ func (m *MM[T]) EndBlock() (
 
 				if len(moduleValUpdates) > 0 {
 					if len(validatorUpdates) > 0 {
+						m.logger.Info("validator update 2", "moduleValUpdates", moduleValUpdates, "validatorUpdates", validatorUpdates, "module", module)
 						return nil, errors.New("validator end block updates already set by a previous module")
 					}
 

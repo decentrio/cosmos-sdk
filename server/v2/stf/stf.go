@@ -188,6 +188,7 @@ func (s STF[T]) deliverTx(
 	}()
 	// handle error from GetGasLimit
 	gasLimit, gasLimitErr := tx.GetGasLimit()
+	s.logger.Info("tx.GetGasLimit()", "gasLimit", gasLimit,  "gasLimitErr", gasLimitErr)
 	if gasLimitErr != nil {
 		return appmanager.TxResult{
 			Error: gasLimitErr,
@@ -201,6 +202,7 @@ func (s STF[T]) deliverTx(
 	}
 
 	validateGas, validationEvents, err := s.validateTx(ctx, state, gasLimit, tx)
+	s.logger.Info("validateTx", "validateGas", validateGas, "validationEvents", validationEvents, "err", err)
 	if err != nil {
 		return appmanager.TxResult{
 			Error: err,
@@ -208,6 +210,7 @@ func (s STF[T]) deliverTx(
 	}
 
 	execResp, execGas, execEvents, err := s.execTx(ctx, state, gasLimit-validateGas, tx, execMode, hi)
+	s.logger.Info("execTx", "execResp", execResp, "execGas", execGas, "execEvents", execEvents, "err", err)
 	return appmanager.TxResult{
 		Events:    append(validationEvents, execEvents...),
 		GasUsed:   execGas + validateGas,
@@ -233,7 +236,9 @@ func (s STF[T]) validateTx(
 	validateCtx := s.makeContext(ctx, appmanager.RuntimeIdentity, validateState, transaction.ExecModeCheck)
 	validateCtx.setHeaderInfo(hi)
 	validateCtx.setGasLimit(gasLimit)
+	s.logger.Info("before doTxValidation", "validateCtx", validateCtx, "tx", tx)
 	err = s.doTxValidation(validateCtx, tx)
+	s.logger.Info("after doTxValidation", "err", err)
 	if err != nil {
 		return 0, nil, err
 	}

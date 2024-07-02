@@ -33,6 +33,9 @@ func (k Keeper) BlockValidatorUpdates(ctx context.Context) ([]appmodule.Validato
 	// ApplyAndReturnValidatorSetUpdates and then Unbonding -> Unbonded during
 	// UnbondAllMatureValidatorQueue).
 	validatorUpdates, err := k.ApplyAndReturnValidatorSetUpdates(ctx)
+
+	k.Logger.Info("ApplyAndReturnValidatorSetUpdates", "validatorUpdates", validatorUpdates, "err", err)
+
 	if err != nil {
 		return nil, err
 	}
@@ -163,10 +166,12 @@ func (k Keeper) ApplyAndReturnValidatorSetUpdates(ctx context.Context) ([]appmod
 
 	var updates []appmodule.ValidatorUpdate
 	for count := 0; iterator.Valid() && count < int(maxValidators); iterator.Next() {
+		
 		// everything that is iterated in this loop is becoming or already a
 		// part of the bonded validator set
 		valAddr := sdk.ValAddress(iterator.Value())
 		validator, err := k.GetValidator(ctx, valAddr)
+		k.Logger.Info("validator count", "validator", validator.OperatorAddress, "err", err)
 		if err != nil {
 			return nil, fmt.Errorf("validator record not found for address: %X", valAddr)
 		}
