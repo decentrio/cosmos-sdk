@@ -12,6 +12,6 @@ COSMOS_BUILD_OPTIONS=v2 make build
 
 $SIMD testnet init-files --chain-id=testing --output-dir=./testnet --validator-count=3 --keyring-backend=test --minimum-gas-prices=0.000001stake --commit-timeout=900ms --single-host
 
-$SIMD start --log_level=info --home /Users/hieuvu/Documents/Decentrio/cosmos-sdk-decentrio/testnet/node0/simdv2
-$SIMD start --log_level=info --home /Users/hieuvu/Documents/Decentrio/cosmos-sdk-decentrio/testnet/node1/simdv2
-$SIMD start --log_level=info --home /Users/hieuvu/Documents/Decentrio/cosmos-sdk-decentrio/testnet/node2/simdv2
+$SIMD start --log_level=info --home ./testnet/node0/simdv2
+$SIMD start --log_level=info --home ./testnet/node1/simdv2
+$SIMD start --log_level=info --home ./testnet/node2/simdv2
