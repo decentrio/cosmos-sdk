@@ -249,7 +249,6 @@ func (suite *KeeperTestSuite) TestCreateNewDenom() {
 
 	acc0FooBalance := suite.bankKeeper.GetBalance(ctx, accAddrs[0], fooDenom)
 	fmt.Println("newBal", acc0FooBalance)
-
 }
 
 func (s *KeeperTestSuite) TestCreateDenom() {
