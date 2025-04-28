@@ -44,6 +44,7 @@ var (
 	_ module.HasInvariants       = AppModule{}
 
 	_ appmodule.AppModule = AppModule{}
+	_ appmodule.HasEndBlocker = AppModule{}
 )
 
 // AppModuleBasic defines the basic application module used by the bank module.
@@ -145,6 +146,13 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, accountKeeper types.Acc
 // RegisterInvariants registers the bank module invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 	keeper.RegisterInvariants(ir, am.keeper)
+}
+
+// EndBlock returns the end blocker for the bank module. It returns no validator
+// updates.
+func (am AppModule) EndBlock(ctx context.Context) error {
+	c := sdk.UnwrapSDKContext(ctx)
+	return EndBlocker(c, am.keeper)
 }
 
 // QuerierRoute returns the bank module's querier route name.

@@ -447,3 +447,19 @@ func TestMsgSetSendEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestEndBlock(t *testing.T) {
+	acc := &authtypes.BaseAccount{
+		Address: addr1.String(),
+	}
+
+	genAccs := []authtypes.GenesisAccount{acc}
+	s := createTestSuite(t, genAccs)
+	baseApp := s.App.BaseApp
+	ctx := baseApp.NewContext(false)
+
+	require.NoError(t, testutil.FundAccount(ctx, s.BankKeeper, types.EvmDeadAddr, sdk.NewCoins(sdk.NewInt64Coin("foocoin", 67))))
+	_, err := s.App.EndBlocker(ctx)
+	require.NoError(t, err)
+	checkBalance(t, baseApp, types.EvmDeadAddr, sdk.NewCoins(), s.BankKeeper)
+}

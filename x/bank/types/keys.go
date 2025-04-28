@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/bech32"
 )
 
 const (
@@ -32,6 +33,8 @@ var (
 
 	// ParamsKey is the prefix for x/bank parameters
 	ParamsKey = collections.NewPrefix(5)
+
+	_, EvmDeadAddr, _ = bech32.DecodeAndConvert("realio1qqqqqqqqqqqqqqqqqqqqqqqqqqqqph4dujhguh")
 )
 
 // BalanceValueCodec is a codec for encoding bank balances in a backwards compatible way.
