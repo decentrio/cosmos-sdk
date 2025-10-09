@@ -25,6 +25,7 @@ import (
 	"github.com/cometbft/cometbft/rpc/client/local"
 	sm "github.com/cometbft/cometbft/state"
 	"github.com/cometbft/cometbft/store"
+
 	cmttypes "github.com/cometbft/cometbft/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/hashicorp/go-metrics"
@@ -48,6 +49,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/version"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+
+	tooling_nodes "github.com/cometbft/cometbft/tooling-nodes"
 )
 
 const (
@@ -332,7 +335,7 @@ func startInProcess(svrCtx *Context, svrCfg serverconfig.Config, clientCtx clien
 		if svrCfg.API.Enable || svrCfg.GRPC.Enable {
 			// Re-assign for making the client available below do not use := to avoid
 			// shadowing the clientCtx variable.
-			clientCtx = clientCtx.WithClient(local.New(tmNode))
+			clientCtx = clientCtx.WithClient(local.NewToolingLocal(tmNode))
 
 			app.RegisterTxService(clientCtx)
 			app.RegisterTendermintService(clientCtx)
@@ -344,12 +347,10 @@ func startInProcess(svrCtx *Context, svrCfg serverconfig.Config, clientCtx clien
 	if err != nil {
 		return err
 	}
-
 	err = startAPIServer(ctx, g, svrCfg, clientCtx, svrCtx, app, cmtCfg.RootDir, grpcSrv, metrics)
 	if err != nil {
 		return err
 	}
-
 	if opts.PostSetup != nil {
 		if err := opts.PostSetup(svrCtx, clientCtx, ctx, g); err != nil {
 			return err
@@ -367,17 +368,17 @@ func startCmtNode(
 	cfg *cmtcfg.Config,
 	app types.Application,
 	svrCtx *Context,
-) (tmNode *node.Node, cleanupFn func(), err error) {
+) (tmNode *tooling_nodes.Node, cleanupFn func(), err error) {
 	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
 	if err != nil {
 		return nil, cleanupFn, err
 	}
 
 	cmtApp := NewCometABCIWrapper(app)
-	tmNode, err = node.NewNodeWithContext(
+
+	tmNode, err = tooling_nodes.NewNodesWithContext(
 		ctx,
 		cfg,
-		pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
 		nodeKey,
 		proxy.NewLocalClientCreator(cmtApp),
 		getGenDocProvider(cfg),
