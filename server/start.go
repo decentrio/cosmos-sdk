@@ -50,8 +50,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
-	"github.com/cometbft/cometbft/tooling-nodes"
-	"github.com/cosmos/cosmos-sdk/server/tooling-keyset"
+	tooling_nodes "github.com/cometbft/cometbft/tooling-nodes"
 )
 
 const (
@@ -380,13 +379,10 @@ func startCmtNode(
 
 	cmtApp := NewCometABCIWrapper(app)
 	fmt.Println("node starttttttttt 1111")
-	// todo
 
 	tmNode, err = tooling_nodes.NewNodesWithContext(
 		ctx,
 		cfg,
-		pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()).Key.PubKey,
-		tooling_keyset.GetPubKeys(),
 		nodeKey,
 		proxy.NewLocalClientCreator(cmtApp),
 		getGenDocProvider(cfg),
