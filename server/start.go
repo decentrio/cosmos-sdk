@@ -343,17 +343,14 @@ func startInProcess(svrCtx *Context, svrCfg serverconfig.Config, clientCtx clien
 		}
 	}
 
-	fmt.Println("sdkkkkkkkkkkkkkkk, start grpc")
 	grpcSrv, clientCtx, err := startGrpcServer(ctx, g, svrCfg.GRPC, clientCtx, svrCtx, app)
 	if err != nil {
 		return err
 	}
-	fmt.Println("sdkkkkkkkkkkkkkkk, start api server")
 	err = startAPIServer(ctx, g, svrCfg, clientCtx, svrCtx, app, cmtCfg.RootDir, grpcSrv, metrics)
 	if err != nil {
 		return err
 	}
-	fmt.Println("sdkkkkkkkkkkkkkkk333, start api server")
 	if opts.PostSetup != nil {
 		if err := opts.PostSetup(svrCtx, clientCtx, ctx, g); err != nil {
 			return err
@@ -378,7 +375,6 @@ func startCmtNode(
 	}
 
 	cmtApp := NewCometABCIWrapper(app)
-	fmt.Println("node starttttttttt 1111")
 
 	tmNode, err = tooling_nodes.NewNodesWithContext(
 		ctx,
@@ -399,7 +395,6 @@ func startCmtNode(
 	}
 
 	// thieu consensus
-	fmt.Println("node starttttttttt 2222")
 	cleanupFn = func() {
 		if tmNode != nil && tmNode.IsRunning() {
 			_ = tmNode.Stop()
