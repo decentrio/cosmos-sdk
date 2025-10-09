@@ -11,7 +11,7 @@ import (
 var (
 	prvKeysFake          []*privval.FilePV
 	keyProposal          *privval.FilePV
-	path_file_publickeys = "/Users/donglieu/925/cosmos-sdk/server/tooling-keyset/keys/publickeys.json"
+	path_file_publickeys = "/Users/donglieu/script/onomy/tooling/phase2/publickeys.json"
 )
 
 func init() {
