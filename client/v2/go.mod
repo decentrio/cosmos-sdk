@@ -154,4 +154,4 @@ require (
 	nhooyr.io/websocket v1.8.6 // indirect
 	pgregory.net/rapid v1.1.0 // indirect
 )
-replace github.com/cometbft/cometbft => /Users/donglieu/925/cometbft
+replace github.com/cometbft/cometbft => github.com/DongLieu/cometbft v0.38.10-0.20251009080721-18afdd68819f

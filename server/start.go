@@ -394,7 +394,6 @@ func startCmtNode(
 		return tmNode, cleanupFn, err
 	}
 
-	// thieu consensus
 	cleanupFn = func() {
 		if tmNode != nil && tmNode.IsRunning() {
 			_ = tmNode.Stop()
