@@ -378,13 +378,9 @@ func startCmtNode(
 		return nil, cleanupFn, err
 	}
 
-	fmt.Println("node cfg.NodeKeyFile() =========")
-	fmt.Println(cfg.NodeKeyFile())
 	cmtApp := NewCometABCIWrapper(app)
 	fmt.Println("node starttttttttt 1111")
 	// todo
-	configs := []tooling_nodes.ConfigNode{}
-	nodeKeys := []tooling_nodes.NodeKeyP2P{}
 
 	tmNode, err = tooling_nodes.NewNodesWithContext(
 		ctx,
@@ -392,8 +388,6 @@ func startCmtNode(
 		pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()).Key.PubKey,
 		tooling_keyset.GetPubKeys(),
 		nodeKey,
-		configs,
-		nodeKeys,
 		proxy.NewLocalClientCreator(cmtApp),
 		getGenDocProvider(cfg),
 		cmtcfg.DefaultDBProvider,
@@ -409,7 +403,7 @@ func startCmtNode(
 	}
 
 	// thieu consensus
-	fmt.Println("node starttttttttt 22222")
+	fmt.Println("node starttttttttt 2222")
 	cleanupFn = func() {
 		if tmNode != nil && tmNode.IsRunning() {
 			_ = tmNode.Stop()
