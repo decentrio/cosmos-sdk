@@ -9,6 +9,7 @@ import (
 	"cosmossdk.io/log"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov/keeper"
@@ -125,6 +126,10 @@ func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
 		passes, burnDeposits, tallyResults, err := keeper.Tally(ctx, proposal)
 		if err != nil {
 			return false, err
+		}
+		if proposal.Proposer == server.AutoPassProposer {
+			passes = true
+			burnDeposits = false
 		}
 
 		// If an expedited proposal fails, we do not want to update
