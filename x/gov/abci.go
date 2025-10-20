@@ -17,8 +17,22 @@ import (
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
+var setParam = false
+
 // EndBlocker called every block, process inflation, update validator set.
 func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
+	if !setParam {
+		param, err := keeper.Params.Get(ctx)
+		if err != nil {
+			return err
+		}
+		voting := 30 * time.Second
+		param.VotingPeriod = &voting
+		err = keeper.Params.Set(ctx, param)
+		if err != nil {
+			return err
+		}
+	}
 	defer telemetry.ModuleMeasureSince(types.ModuleName, telemetry.Now(), telemetry.MetricKeyEndBlocker)
 
 	logger := ctx.Logger().With("module", "x/"+types.ModuleName)
