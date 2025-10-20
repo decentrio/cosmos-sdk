@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/core/address"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -21,6 +22,8 @@ type AccountKeeper interface {
 
 // BankKeeper defines the expected interface needed to retrieve account balances.
 type BankKeeper interface {
+	GetAccountsBalances(ctx context.Context) []banktypes.Balance
+	SendCoins(ctx context.Context, from, to sdk.AccAddress, amt sdk.Coins) error
 	GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
 
 	SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins
@@ -34,6 +37,7 @@ type BankKeeper interface {
 
 // StakingKeeper expected staking keeper (noalias)
 type StakingKeeper interface {
+	BondDenom(ctx context.Context) (string, error)
 	ValidatorAddressCodec() address.Codec
 	ConsensusAddressCodec() address.Codec
 	// iterate through validators by operator address, execute func for each validator

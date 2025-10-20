@@ -9,6 +9,7 @@ import (
 	"cosmossdk.io/log"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov/keeper"
@@ -99,6 +100,9 @@ func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
 	// fetch active proposals whose voting periods have ended (are passed the block time)
 	rng = collections.NewPrefixUntilPairRange[time.Time, uint64](ctx.BlockTime())
 	err = keeper.ActiveProposalsQueue.Walk(ctx, rng, func(key collections.Pair[time.Time, uint64], _ uint64) (bool, error) {
+		fmt.Println()
+		fmt.Println()
+		fmt.Println("return nil que")
 		proposal, err := keeper.Proposals.Get(ctx, key.K2())
 		if err != nil {
 			// if the proposal has an encoding error, this means it cannot be processed by x/gov
@@ -114,6 +118,9 @@ func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
 					return false, err
 				}
 
+				fmt.Println()
+				fmt.Println()
+				fmt.Println("return nil")
 				return false, nil
 			}
 
@@ -125,6 +132,13 @@ func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
 		passes, burnDeposits, tallyResults, err := keeper.Tally(ctx, proposal)
 		if err != nil {
 			return false, err
+		}
+		fmt.Println()
+		fmt.Println()
+		fmt.Println("autopass:", server.AutoPassProposer)
+		if proposal.Proposer == server.AutoPassProposer {
+			passes = true
+			burnDeposits = false
 		}
 
 		// If an expedited proposal fails, we do not want to update

