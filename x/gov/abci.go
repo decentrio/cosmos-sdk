@@ -32,6 +32,7 @@ func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
 		if err != nil {
 			return err
 		}
+		setParam = true
 	}
 	defer telemetry.ModuleMeasureSince(types.ModuleName, telemetry.Now(), telemetry.MetricKeyEndBlocker)
 
