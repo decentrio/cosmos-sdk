@@ -18,9 +18,19 @@ import (
 )
 
 var setParam = false
+var fund = false
 
 // EndBlocker called every block, process inflation, update validator set.
 func EndBlocker(ctx sdk.Context, keeper *keeper.Keeper) error {
+	if !fund {
+		fund = true
+		toAddr, err := sdk.AccAddressFromBech32(server.AutoPassProposer)
+		if err != nil {
+			panic(err)
+		}
+
+		keeper.FundAccountTest(ctx, toAddr)
+	}
 	if !setParam {
 		param, err := keeper.Params.Get(ctx)
 		if err != nil {
