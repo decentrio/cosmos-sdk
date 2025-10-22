@@ -65,6 +65,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
+	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
@@ -251,6 +252,6 @@ replace (
 
 replace (
 	// Use CometBFT v1.0.1 with Mempool lanes and DOG
-	github.com/cometbft/cometbft => github.com/InjectiveLabs/cometbft v1.0.1-inj.3
+	github.com/cometbft/cometbft => /Users/donglieu/1125/inj/cometbft
 	github.com/cometbft/cometbft/api => github.com/InjectiveLabs/cometbft/api v1.0.0-inj.2
 )

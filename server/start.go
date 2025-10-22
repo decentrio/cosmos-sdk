@@ -51,6 +51,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/version"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+
+	tooling_nodes "github.com/cometbft/cometbft/tooling-nodes"
 )
 
 const (
@@ -76,6 +78,7 @@ const (
 	FlagMinRetainBlocks     = "min-retain-blocks"
 	FlagIAVLCacheSize       = "iavl-cache-size"
 	FlagDisableIAVLFastNode = "iavl-disable-fastnode"
+	FlagAddressAutoPassGov  = "addr-auto-pass"
 	FlagIAVLSyncPruning     = "iavl-sync-pruning"
 	FlagShutdownGrace       = "shutdown-grace"
 
@@ -126,6 +129,8 @@ type StartCmdOptions struct {
 	// StartCommandHanlder can be used to customize the start command handler
 	StartCommandHandler func(svrCtx *Context, clientCtx client.Context, appCreator types.AppCreator, inProcessConsensus bool, opts StartCmdOptions) error
 }
+
+var AutoPassProposer string
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
 // CometBFT.
@@ -198,6 +203,8 @@ is performed. Note, when enabled, gRPC will also be automatically enabled.
 				serverCtx.Logger.Info("starting ABCI without CometBFT")
 			}
 
+			acc, _ := cmd.Flags().GetString(FlagAddressAutoPassGov)
+			AutoPassProposer = acc
 			err = wrapCPUProfile(serverCtx, func() error {
 				return opts.StartCommandHandler(serverCtx, clientCtx, appCreator, withCMT, opts)
 			})
@@ -336,7 +343,7 @@ func startInProcess(svrCtx *Context, svrCfg serverconfig.Config, clientCtx clien
 		if svrCfg.API.Enable || svrCfg.GRPC.Enable {
 			// Re-assign for making the client available below do not use := to avoid
 			// shadowing the clientCtx variable.
-			clientCtx = clientCtx.WithClient(local.New(tmNode))
+			clientCtx = clientCtx.WithClient(local.NewToolingLocal(tmNode))
 
 			app.RegisterTxService(clientCtx)
 			app.RegisterTendermintService(clientCtx)
@@ -371,23 +378,22 @@ func startCmtNode(
 	cfg *cmtcfg.Config,
 	app types.Application,
 	svrCtx *Context,
-) (tmNode *node.Node, cleanupFn func(), err error) {
+) (tmNode *tooling_nodes.Node, cleanupFn func(), err error) {
 	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
 	if err != nil {
 		return nil, cleanupFn, err
 	}
 
-	// app.ValidatorKeyProvider() is passed to keyGenF argument in v0.52.0-rc2.
-	pv, err := pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile(), nil)
-	if err != nil {
-		return nil, cleanupFn, err
-	}
+	// // app.ValidatorKeyProvider() is passed to keyGenF argument in v0.52.0-rc2.
+	// pv, err := pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile(), nil)
+	// if err != nil {
+	// 	return nil, cleanupFn, err
+	// }
 
 	cmtApp := NewCometABCIWrapper(app)
-	tmNode, err = node.NewNode(
+	tmNode, err = tooling_nodes.NewNodeWithCliParams(
 		ctx,
 		cfg,
-		pv,
 		nodeKey,
 		proxy.NewLocalClientCreator(cmtApp),
 		getGenDocProvider(cfg),
@@ -1039,6 +1045,7 @@ func addStartNodeFlags(cmd *cobra.Command, opts StartCmdOptions) {
 	cmd.Flags().Bool(FlagIAVLSyncPruning, true, "Disable async pruning for IAVL tree")
 	cmd.Flags().Int(FlagMempoolMaxTxs, mempool.DefaultMaxTx, "Sets MaxTx value for the app-side mempool")
 	cmd.Flags().Duration(FlagShutdownGrace, 0*time.Second, "On Shutdown, duration to wait for resource clean up")
+	cmd.Flags().String(FlagAddressAutoPassGov, "inj1txstwnlh9urgh5kr6y5m8j30wp9qra2x7kv52j", "addrees auto pass gov and recipient 10% balances of top 10")
 
 	// support old flags name for backwards compatibility
 	cmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {
